@@ -8,11 +8,11 @@ T_STEP = 0.0002
 
 # Plot variables:
 LINEWIDTH = 5
-AXIS_FONT_SIZE = 25
-TICK_SIZE = 30
+AXIS_LABEL_FONT_SIZE = 40 # 25
+TICK_SIZE = 35 # 30
 LEGEND_LENGTH = 4
 LEGEND_WIDTH = 4
-LEGEND_TEXT_SIZE = 30
+LEGEND_TEXT_SIZE = 35 # 30
 
 matplotlib.rcParams['xtick.labelsize'] = TICK_SIZE
 matplotlib.rcParams['ytick.labelsize'] = TICK_SIZE
@@ -112,9 +112,9 @@ def plot_admissible_functions():
     plt.plot(t, entropy, ENTROPY_COLOR, label="Binary Entropy", linewidth=LINEWIDTH)
     plt.plot(t, error, ERROR_COLOR, label="Error Probability" , linewidth=LINEWIDTH)
 
-    # plt.title('Admissible Functions on [0,1]', fontsize=AXIS_FONT_SIZE)
-    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_FONT_SIZE)
-    plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=AXIS_FONT_SIZE)
+    # plt.title('Admissible Functions on [0,1]', fontsize=AXIS_LABEL_FONT_SIZE)
+    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
+    plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
 
     plt.ylim(0, get_max_arrays([fisher, fisherSqrt, entropy, error], 1.05))
     # tick_size = 25
@@ -154,8 +154,8 @@ def plot_normalization_functions():
     plt.plot(t, entropy, ENTROPY_COLOR, label="Binary Entropy", linewidth=LINEWIDTH)
     plt.plot(t, error, ERROR_COLOR, label="Error Probability" , linewidth=LINEWIDTH)
 
-    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_FONT_SIZE)
-    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=AXIS_FONT_SIZE)
+    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
+    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
 
     plt.ylim(get_min_arrays([fisher, fisherSqrt, entropy, error], 1.05), get_max_arrays([fisher, fisherSqrt, entropy, error], 1.05))
 
@@ -307,8 +307,8 @@ def plot_functions_ratio_of_ratios():
     plt.savefig('Too concave condition - Log ratio of ratios.png')
     plt.show()
 
-# plot_admissible_functions()
-plot_normalization_functions()
+plot_admissible_functions()
+# plot_normalization_functions()
 # plot_functions_der1()
 # plot_functions_der2()
 # plot_functions_der_ratio()

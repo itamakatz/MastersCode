@@ -5,11 +5,18 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
 T_STEP = 0.0002
-TICK_SIZE = 30
 
-matplotlib.rcParams['legend.handlelength'] = 4
+# Plot variables:
+LINEWIDTH = 5
+AXIS_FONT_SIZE = 25
+TICK_SIZE = 30
+LEGEND_LENGTH = 4
+LEGEND_WIDTH = 4
+LEGEND_TEXT_SIZE = 30
+
 matplotlib.rcParams['xtick.labelsize'] = TICK_SIZE
 matplotlib.rcParams['ytick.labelsize'] = TICK_SIZE
+matplotlib.rcParams['legend.handlelength'] = LEGEND_LENGTH
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
@@ -65,7 +72,7 @@ def get_error_normalization(t, x0):
     return get_normalization(t, get_error, get_error_der1, x0)
 
 def get_normalization(xs, func, func_der1, x0):
-    x0_index = get_index_of_value(xs, x0)
+    x0_index = get_array_index_by_value(xs, x0)
     func_ys = func(xs)
     func_at_x0 = func_ys[x0_index]
     func_der1_at_x0 = func_der1(xs)[x0_index]
@@ -81,11 +88,12 @@ def get_max_arrays(arrays, factor = 1):
     maxY = np.array(arrays).max(axis=0).max()
     return maxY * factor
 
-def get_index_of_value(array, val):
+def get_array_index_by_value(array, val):
     return min(range(len(array)), key=lambda i: abs(array[i]-val))
 
 def new_figure():
-    plt.figure(num=None, figsize=(16, 12), dpi=80)
+    # plt.figure(num=None, figsize=(16, 12), dpi=80)
+    return plt.figure(num=None, figsize=(16, 12), dpi=80)
 
 def plot_admissible_functions():
 
@@ -99,16 +107,14 @@ def plot_admissible_functions():
 
     new_figure()
     
-    LINEWIDTH = 5
-    FONT_SIZE = 25
     plt.plot(t, fisher, FISHER_COLOR, label="Fisher", linewidth=LINEWIDTH)
     plt.plot(t, fisherSqrt, FISHER_SQRT_COLOR, label="Root-Fisher" , linewidth=LINEWIDTH)
     plt.plot(t, entropy, ENTROPY_COLOR, label="Binary Entropy", linewidth=LINEWIDTH)
     plt.plot(t, error, ERROR_COLOR, label="Error Probability" , linewidth=LINEWIDTH)
 
-    # plt.title('Admissible Functions on [0,1]', fontsize=FONT_SIZE)
-    plt.xlabel(r'$\boldsymbol{p}$', fontsize=FONT_SIZE)
-    plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=FONT_SIZE)
+    # plt.title('Admissible Functions on [0,1]', fontsize=AXIS_FONT_SIZE)
+    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_FONT_SIZE)
+    plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=AXIS_FONT_SIZE)
 
     plt.ylim(0, get_max_arrays([fisher, fisherSqrt, entropy, error], 1.05))
     # tick_size = 25
@@ -120,8 +126,8 @@ def plot_admissible_functions():
     leg = plt.legend()
     leg_lines = leg.get_lines()
     leg_texts = leg.get_texts()
-    plt.setp(leg_lines, linewidth=4)
-    plt.setp(leg_texts, fontsize=30)
+    plt.setp(leg_lines, linewidth=LEGEND_WIDTH)
+    plt.setp(leg_texts, fontsize=LEGEND_TEXT_SIZE)
     # plt.legend(loc="upper left")
 
     plt.savefig('Admissible Functions.png')
@@ -141,27 +147,29 @@ def plot_normalization_functions():
 
     new_figure()
     
-    LINEWIDTH = 5
-    FONT_SIZE = 25
+    # MIN_Y_LIM = -0.6
+    plt.plot([x0,x0], [-1, fisher[get_array_index_by_value(t, x0)]], color='k', linestyle='--', alpha=0.7)
     plt.plot(t, fisher, FISHER_COLOR, label="Fisher", linewidth=LINEWIDTH)
     plt.plot(t, fisherSqrt, FISHER_SQRT_COLOR, label="Root-Fisher" , linewidth=LINEWIDTH)
     plt.plot(t, entropy, ENTROPY_COLOR, label="Binary Entropy", linewidth=LINEWIDTH)
     plt.plot(t, error, ERROR_COLOR, label="Error Probability" , linewidth=LINEWIDTH)
 
-    # plt.title('Admissible Functions on [0,1]', fontsize=FONT_SIZE)
-    plt.xlabel(r'$\boldsymbol{p}$', fontsize=FONT_SIZE)
-    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=FONT_SIZE)
+    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_FONT_SIZE)
+    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=AXIS_FONT_SIZE)
 
-    plt.ylim(-0.6, get_max_arrays([fisher, fisherSqrt, entropy, error], 1.05))
+    plt.ylim(get_min_arrays([fisher, fisherSqrt, entropy, error], 1.05), get_max_arrays([fisher, fisherSqrt, entropy, error], 1.05))
+
+    plt.xticks(np.concatenate((np.linspace(0.0, 1.0, num=6, endpoint=True), np.ones(1)*x0)))
+    # plt.xticks(np.concatenate((np.arange(0, 1+0.01, 0.2), np.ones(1)*x0)))
 
     leg = plt.legend()
     leg_lines = leg.get_lines()
     leg_texts = leg.get_texts()
-    plt.setp(leg_lines, linewidth=4)
-    plt.setp(leg_texts, fontsize=30)
+    plt.setp(leg_lines, linewidth=LEGEND_WIDTH)
+    plt.setp(leg_texts, fontsize=LEGEND_TEXT_SIZE)
     # plt.legend(loc="upper left")
 
-    plt.savefig('Normalized Functions.png')
+    plt.savefig(f'Normalized Functions with pi_0={x0}.png')
     plt.show()
 
 def plot_functions_der1():

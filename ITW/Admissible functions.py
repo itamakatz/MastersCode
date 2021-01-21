@@ -4,11 +4,12 @@ import matplotlib.font_manager
 import matplotlib.pyplot as plt
 from itertools import cycle
 from matplotlib.pyplot import figure
+import matplotlib.colors as mcolors
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
-# USE_LATEX = False
-USE_LATEX = True
+USE_LATEX = False
+# USE_LATEX = True
 
 T_STEP = 0.0002
 
@@ -37,7 +38,7 @@ def get_fisherGeneral(t,a):
 def get_fisherGeneral_der1(t,a):
     return np.array(a*(1-2*t)*((t*(1-t))**(a-1)))
 def get_fisherGeneral_der2(t,a):
-    return np.array((a-1)*a*((1-2*t)**2)*(((1-t)*t)**(a-2))-2*a(((1-t)*t)**(a-1)))
+    return np.array((a-1)*a*((1-2*t)**2)*(((1-t)*t)**(a-2))-2*a*(((1-t)*t)**(a-1)))
 def get_fisherGeneral_ratio(t,a):
     return np.array(get_fisherGeneral_der2(t,a)/get_fisherGeneral_der1(t,a))
 def get_fisherGeneral_normalization(t, x0, a):
@@ -97,7 +98,9 @@ def get_and_set_legend():
     return leg
 
 def get_cycle_colors():
-    return cycle('brgycm')
+    # colors_list = list(c[0] for c in mcolors.TABLEAU_COLORS.items())
+    colors_list = 'brgycm'
+    return cycle(colors_list)
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
@@ -115,7 +118,7 @@ def plot_admissible_functions(t):
 
     for i in range(len(data)):
         plt.plot(t, data[i][0], next(colors), label=data[i][1], linewidth=LINEWIDTH)
-    
+
     # Set Figure details #  
     get_and_set_legend()
     plt.ylim(0, get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y

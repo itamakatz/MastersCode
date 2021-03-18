@@ -47,12 +47,12 @@ def get_relative_func(f, xs, delta, x0):
     f_der = f_der_array[x0_index]
     f_x = f(xs)
     f_x0 = f(x0)
-    f_relative = (f_x - f_x0)/f_der + x0
+    f_relative = (f_x - f_x0)/np.abs(f_der) + x0
 
     if(DEBUG):
         f_relative_2 = []
         for i in range(len(f_x)):
-            f_relative_2.append((f_x[i] - f_x0)/f_der + x0)
+            f_relative_2.append((f_x[i] - f_x0)/np.abs(f_der) + x0)
 
         assert len(f_relative_2) == len(f_relative)
 
@@ -92,7 +92,7 @@ def get_array_index_by_value(array, val):
     return min(range(len(array)), key=lambda i: abs(array[i]-val))
 
 # x0 = 0.3
-x0 = 0.3
+x0 = 0.7
 delta = 0.0001
 
 # xs = np.arange(0.0001, 0.4, delta)
@@ -114,7 +114,8 @@ polyFunc = lambda a,x: np.power(x,a)
 # (_, exp_relative) = get_relative_func(expFunc,xs,delta,x0)
 # (xs, quartic_relative) = get_relative_func(lambda x: polyFunc(4,x),xs,delta,x0)
 
-x0_index = np.where(xs==x0)
+# x0_index = np.where(xs==x0)
+x0_index = get_array_index_by_value(xs,x0)
 y_at_x0 = fisherSqrt_relative[x0_index]
 min_y = min(fisher_relative[0], 
             fisherSqrt_relative[0], 

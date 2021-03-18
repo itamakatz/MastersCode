@@ -4,8 +4,10 @@ from numpy import diff
 
 import matplotlib
 import matplotlib.font_manager
-matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
+LATEX_FLAG = False
+if(LATEX_FLAG):
+    matplotlib.rcParams['text.usetex'] = True
+    matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 # plt.rcParams.update({
 #     "text.usetex": True,
 #     "font.family": "sans-serif",
@@ -40,7 +42,8 @@ def get_func_der(f, xs, delta):
 #   f_{x0}(x) = (f(x)-f(x0)) / (f'(x0)) + x0
 def get_relative_func(f, xs, delta, x0):
     (xs, f_der_array) = get_func_der(f, xs, delta)
-    x0_index = np.where(xs==x0)
+    # x0_index = np.where(xs==x0)
+    x0_index = get_array_index_by_value(xs,x0)
     f_der = f_der_array[x0_index]
     f_x = f(xs)
     f_x0 = f(x0)
@@ -56,10 +59,11 @@ def get_relative_func(f, xs, delta, x0):
         for i in range(len(f_relative)):
             assert f_relative_2[i] == f_relative[i]
 
-    print("x0 len: "+str(x0))
+    print("x0: "+str(x0))
     print("f_x len: "+str(len(f_x)))
-    print("f_x0 len: "+str(f_x0))
-    print("f_der len: "+str(len(f_der)))
+    print("f_x0: "+str(f_x0))
+    # print("f_der len: "+str(len(f_der)))
+    print("f_der: "+str(f_der))
     print("f_relative len: "+str(len(f_relative)))
     return (xs, f_relative)
 
@@ -84,6 +88,10 @@ def test_derivatives(f, delta):
     plt.legend(loc="upper left")
     plt.show()
 
+def get_array_index_by_value(array, val):
+    return min(range(len(array)), key=lambda i: abs(array[i]-val))
+
+# x0 = 0.3
 x0 = 0.3
 delta = 0.0001
 
@@ -95,11 +103,16 @@ fisherSqrt = lambda x: np.sqrt(x*(1-x))
 fisher = lambda x: x*(1-x)
 entropy = lambda x: -x*np.log(x)-(1-x)*np.log(1-x)
 minError = lambda x: np.array([x,1-x]).min(0)
+expFunc = lambda x: np.exp(x)
+polyFunc = lambda a,x: np.power(x,a)
 
 (_, fisherSqrt_relative) = get_relative_func(fisherSqrt,xs,delta,x0)
 (_, fisher_relative) = get_relative_func(fisher,xs,delta,x0)
 (_, entropy_relative) = get_relative_func(entropy,xs,delta,x0)
 (xs, minError_relative) = get_relative_func(minError,xs,delta,x0)
+
+# (_, exp_relative) = get_relative_func(expFunc,xs,delta,x0)
+# (xs, quartic_relative) = get_relative_func(lambda x: polyFunc(4,x),xs,delta,x0)
 
 x0_index = np.where(xs==x0)
 y_at_x0 = fisherSqrt_relative[x0_index]
@@ -107,12 +120,17 @@ min_y = min(fisher_relative[0],
             fisherSqrt_relative[0], 
             entropy_relative[0], 
             minError_relative[0])
+# y_at_x0 = exp_relative[x0_index]
+# min_y = min(exp_relative[0], quartic_relative[0])
 
 LINE_WIDTH = 2.5
 plt.plot(xs, fisher_relative, FISHER_COLOR, label="Fisher Normalized", linewidth=LINE_WIDTH)
 plt.plot(xs, fisherSqrt_relative, FISHER_SQRT_COLOR, label="Root-Fisher Normalized", linewidth=LINE_WIDTH)
 plt.plot(xs, entropy_relative, ENTROPY_COLOR, label="Binary Entropy Normalized", linewidth=LINE_WIDTH)
 plt.plot(xs, minError_relative, ERROR_COLOR, label="Error Probability Normalized", linewidth=LINE_WIDTH)
+
+# plt.plot(xs, exp_relative, FISHER_COLOR, label="Exp Normalized", linewidth=LINE_WIDTH)
+# plt.plot(xs, quartic_relative, FISHER_SQRT_COLOR, label="Quartic Normalized", linewidth=LINE_WIDTH)
 
 plt_xmin, plt_xmax, plt_ymin, plt_ymax = plt.axis()
 
@@ -123,10 +141,12 @@ plt.plot([x0, x0], [plt_ymin-1, y_at_x0-0.008], 'k', alpha=0.7, linestyle=":", l
 
 FONT_SIZE = 25
 # plt.title(r'Linear normalization with $\displaystyle \pi_0={{{}}}$'.format(pi_0), fontsize=FONT_SIZE)
-plt.xlabel(r'$\boldsymbol{p}$', fontsize=FONT_SIZE)
-plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=FONT_SIZE)
-# plt.xlabel(r'$\boldsymbol{p}$', fontsize=font_size)
-# plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=font_size)
+if(LATEX_FLAG):
+    plt.xlabel(r'$\boldsymbol{p}$', fontsize=FONT_SIZE)
+    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=FONT_SIZE)
+else:
+    plt.xlabel('p', fontsize=FONT_SIZE)
+    plt.ylabel('g_p_0(p)', fontsize=FONT_SIZE)
 
 TICK_SIZE = 30
 plt.xticks(fontsize=TICK_SIZE)

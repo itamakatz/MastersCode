@@ -8,6 +8,9 @@ import matplotlib.colors as mcolors
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
+SAVE_FIGURES = False
+# SAVE_FIGURES = True
+
 USE_LATEX = False
 # USE_LATEX = True
 
@@ -71,7 +74,7 @@ def get_normalization(xs, func_ys, func_der1, x0):
     x0_index = get_array_index_by_value(xs, x0)
     func_at_x0 = func_ys[x0_index]
     func_der1_at_x0 = func_der1[x0_index]
-    return np.array((func_ys-func_at_x0) / func_der1_at_x0 +x0)
+    return np.array((func_ys-func_at_x0) / abs(func_der1_at_x0) +x0)
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
@@ -126,7 +129,9 @@ def plot_admissible_functions(t):
         plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
         plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
 
-    plt.savefig('Admissible Functions.png')
+    if(SAVE_FIGURES):
+        plt.savefig('Admissible Functions.png')
+
     plt.show()
 
 def plot_normalization_functions(t, x0 = 0.3):
@@ -154,9 +159,11 @@ def plot_normalization_functions(t, x0 = 0.3):
         plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
         plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
 
-    plt.savefig(f'Normalized Functions with pi_0={x0}.png')
+    if(SAVE_FIGURES):
+        plt.savefig(f'Normalized Functions with pi_0={x0}.png')
+
     plt.show()
 
 t = np.append(np.arange(0., 1., T_STEP),1)
-plot_admissible_functions(t)
-plot_normalization_functions(t)
+# plot_admissible_functions(t)
+plot_normalization_functions(t,0.7)

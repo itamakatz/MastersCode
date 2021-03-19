@@ -1,28 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 from numpy import diff
 
 import matplotlib
 import matplotlib.font_manager
+from itertools import cycle
+
+DEBUG = True
 LATEX_FLAG = False
+
+LINEWIDTH = 5
+AXIS_LABEL_FONT_SIZE = 40 # 25
+TICK_SIZE = 35 # 30
+LEGEND_LENGTH = 4
+LEGEND_WIDTH = 4
+LEGEND_TEXT_SIZE = 35 # 30
+
 if(LATEX_FLAG):
     matplotlib.rcParams['text.usetex'] = True
     matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-# plt.rcParams.update({
-#     "text.usetex": True,
-#     "font.family": "sans-serif",
-#     "font.sans-serif": ["Helvetica"]})
-# plt.rcParams.update({
-#     "text.usetex": True,
-#     "font.family": "serif",
-#     "font.serif": ["Palatino"],
-# })
 
-DEBUG = True
-FISHER_COLOR = 'b' #'r'
-FISHER_SQRT_COLOR = 'r' #'m'
-ENTROPY_COLOR = 'g' #'b'
-ERROR_COLOR = 'y' #'g'
+matplotlib.rcParams['xtick.labelsize'] = TICK_SIZE
+matplotlib.rcParams['ytick.labelsize'] = TICK_SIZE
+matplotlib.rcParams['legend.handlelength'] = LEGEND_LENGTH
 
 def shrink_arr(arr):
     return arr[1:]
@@ -39,10 +40,9 @@ def get_func_der(f, xs, delta):
     return (xs, f_der)
 
 # Equation of the linear normalization:
-#   f_{x0}(x) = (f(x)-f(x0)) / (f'(x0)) + x0
+#   f_{x0}(x) = (f(x)-f(x0)) / |(f'(x0))| + x0
 def get_relative_func(f, xs, delta, x0):
     (xs, f_der_array) = get_func_der(f, xs, delta)
-    # x0_index = np.where(xs==x0)
     x0_index = get_array_index_by_value(xs,x0)
     f_der = f_der_array[x0_index]
     f_x = f(xs)
@@ -62,7 +62,6 @@ def get_relative_func(f, xs, delta, x0):
     print("x0: "+str(x0))
     print("f_x len: "+str(len(f_x)))
     print("f_x0: "+str(f_x0))
-    # print("f_der len: "+str(len(f_der)))
     print("f_der: "+str(f_der))
     print("f_relative len: "+str(len(f_relative)))
     return (xs, f_relative)
@@ -91,90 +90,77 @@ def test_derivatives(f, delta):
 def get_array_index_by_value(array, val):
     return min(range(len(array)), key=lambda i: abs(array[i]-val))
 
-# x0 = 0.3
-x0 = 0.7
+def get_cycle_colors():
+    # colors_list = list(c[0] for c in mcolors.TABLEAU_COLORS.items())
+    colors_list = 'brgycm'
+    return cycle(colors_list)
+
+x0 = 0.3
+# x0 = 0.7
 delta = 0.0001
 
-# xs = np.arange(0.0001, 0.4, delta)
+# xs = np.arange(0.0001, 1.4 - 0.0001, delta)
 xs = np.arange(0.0001, 1 - 0.0001, delta)
-# xs = np.arange(0.0001, .5, delta)
+
+x0_index = get_array_index_by_value(xs,x0)
+colors = get_cycle_colors() # get plot colors
 
 fisherSqrt = lambda x: np.sqrt(x*(1-x))
 fisher = lambda x: x*(1-x)
 entropy = lambda x: -x*np.log(x)-(1-x)*np.log(1-x)
 minError = lambda x: np.array([x,1-x]).min(0)
-expFunc = lambda x: np.exp(x)
-polyFunc = lambda a,x: np.power(x,a)
 
 (_, fisherSqrt_relative) = get_relative_func(fisherSqrt,xs,delta,x0)
 (_, fisher_relative) = get_relative_func(fisher,xs,delta,x0)
 (_, entropy_relative) = get_relative_func(entropy,xs,delta,x0)
 (xs, minError_relative) = get_relative_func(minError,xs,delta,x0)
 
-# (_, exp_relative) = get_relative_func(expFunc,xs,delta,x0)
-# (xs, quartic_relative) = get_relative_func(lambda x: polyFunc(4,x),xs,delta,x0)
-
-# x0_index = np.where(xs==x0)
-x0_index = get_array_index_by_value(xs,x0)
 y_at_x0 = fisherSqrt_relative[x0_index]
 min_y = min(fisher_relative[0], 
             fisherSqrt_relative[0], 
             entropy_relative[0], 
             minError_relative[0])
-# y_at_x0 = exp_relative[x0_index]
-# min_y = min(exp_relative[0], quartic_relative[0])
 
-LINE_WIDTH = 2.5
-plt.plot(xs, fisher_relative, FISHER_COLOR, label="Fisher Normalized", linewidth=LINE_WIDTH)
-plt.plot(xs, fisherSqrt_relative, FISHER_SQRT_COLOR, label="Root-Fisher Normalized", linewidth=LINE_WIDTH)
-plt.plot(xs, entropy_relative, ENTROPY_COLOR, label="Binary Entropy Normalized", linewidth=LINE_WIDTH)
-plt.plot(xs, minError_relative, ERROR_COLOR, label="Error Probability Normalized", linewidth=LINE_WIDTH)
+figure(num=None, figsize=(14, 14), dpi=80)
+plt.plot(xs, fisher_relative, next(colors), label="Fisher Normalized", linewidth=LINEWIDTH)
+plt.plot(xs, fisherSqrt_relative, next(colors), label="Root-Fisher Normalized", linewidth=LINEWIDTH)
+plt.plot(xs, entropy_relative, next(colors), label="Binary Entropy Normalized", linewidth=LINEWIDTH)
+plt.plot(xs, minError_relative, next(colors), label="Error Probability Normalized", linewidth=LINEWIDTH)
 
-# plt.plot(xs, exp_relative, FISHER_COLOR, label="Exp Normalized", linewidth=LINE_WIDTH)
-# plt.plot(xs, quartic_relative, FISHER_SQRT_COLOR, label="Quartic Normalized", linewidth=LINE_WIDTH)
+# polyFunc = lambda a,x: np.power(x,a)
+# (_, linear_relative) = get_relative_func(lambda x: polyFunc(1,x),xs,delta,x0)
+# (_, quadratic_relative) = get_relative_func(lambda x: polyFunc(2,x),xs,delta,x0)
+# (xs, quartic_relative) = get_relative_func(lambda x: polyFunc(4,x),xs,delta,x0)
+# y_at_x0 = quadratic_relative[x0_index]
+# min_y = min(linear_relative[0], 
+#             quadratic_relative[0], 
+#             quartic_relative[0])
+# plt.plot(xs, polyFunc(1,xs), next(colors), label="Linear", linewidth=LINEWIDTH)
+# plt.plot(xs, polyFunc(2,xs), next(colors), label="Quadratic", linewidth=LINEWIDTH)
+# plt.plot(xs, polyFunc(4,xs), next(colors), label="Quartic", linewidth=LINEWIDTH)
+# plt.plot(xs, linear_relative, next(colors), label="Linear", linewidth=LINEWIDTH)
+# plt.plot(xs, quadratic_relative, next(colors), label="Quadratic Normalized", linewidth=LINEWIDTH)
+# plt.plot(xs, quartic_relative, next(colors), label="Quartic Normalized", linewidth=LINEWIDTH)
 
 plt_xmin, plt_xmax, plt_ymin, plt_ymax = plt.axis()
 
-plt.plot([x0, x0], [plt_ymin-1, y_at_x0-0.008], 'k', alpha=0.7, linestyle=":", linewidth=LINE_WIDTH)
-# plt.plot([x0+0.1, x0+0.1], [plt_ymin-1, y_at_x0], 'k', alpha=0.7, linestyle="-", linewidth=LINE_WIDTH)
-# plt.plot([x0+0.2, x0+0.2], [plt_ymin-1, y_at_x0], 'k', alpha=0.7, linestyle="-.", linewidth=LINE_WIDTH)
-# plt.plot([x0+0.3, x0+0.3], [plt_ymin-1, y_at_x0], 'k', alpha=0.7, linestyle=":", linewidth=LINE_WIDTH)
+plt.plot([x0, x0], [plt_ymin-1, y_at_x0-0.008], 'k', alpha=0.7, linestyle=":", linewidth=LINEWIDTH)
 
-FONT_SIZE = 25
-# plt.title(r'Linear normalization with $\displaystyle \pi_0={{{}}}$'.format(pi_0), fontsize=FONT_SIZE)
 if(LATEX_FLAG):
-    plt.xlabel(r'$\boldsymbol{p}$', fontsize=FONT_SIZE)
-    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=FONT_SIZE)
+    plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
+    plt.ylabel(r'$\boldsymbol{g_{p_0}(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
 else:
-    plt.xlabel('p', fontsize=FONT_SIZE)
-    plt.ylabel('g_p_0(p)', fontsize=FONT_SIZE)
+    plt.xlabel('p', fontsize=AXIS_LABEL_FONT_SIZE)
+    plt.ylabel('g_p_0(p)', fontsize=AXIS_LABEL_FONT_SIZE)
 
-TICK_SIZE = 30
-plt.xticks(fontsize=TICK_SIZE)
-plt.yticks(fontsize=TICK_SIZE)
 plt.locator_params(axis='x', nbins=11)
 plt.ylim(plt_ymin, plt_ymax) # this is to compensate on the dotted line of x0
 
-
-# plt.ylim(-0.05, 0.55)
-# plt.xlim(-0.05, 0.55)
-# plt.ylim(-0.05, 1.05)
-# plt.xlim(-0.05, 1.05)
-# plt.legend(loc="upper left")
-
 leg = plt.legend()
-leg_lines = leg.get_lines()
-leg_texts = leg.get_texts()
-plt.setp(leg_lines, linewidth=4)
-plt.setp(leg_texts, fontsize=20)
+plt.setp(leg.get_lines(), linewidth=LEGEND_WIDTH)
+plt.setp(leg.get_texts(), fontsize=LEGEND_TEXT_SIZE)
 
 # plt.savefig('Linear normalization with pi_0 = {{}}_ver2'.format(pi_0) + '.png')
 plt.show()
 
 # test_derivatives(lambda x: np.sin(x), delta)
-
-# plt.plot(
-#     [x[amax], x[amax], xlim[0]], 
-#     [xlim[0], y[amax], y[amax]]
-    
-# One of the conditions for admissible functions is - Not too concave: $g(p) \succ \sqrt{p(1-p)}$ when restricted to $p\in(0,1/2)$

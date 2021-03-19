@@ -8,6 +8,9 @@ import matplotlib.colors as mcolors
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
+DEBUG = True
+# DEBUG = False
+
 SAVE_FIGURES = False
 # SAVE_FIGURES = True
 
@@ -36,39 +39,39 @@ matplotlib.rcParams['legend.handlelength'] = LEGEND_LENGTH
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
-def get_fisherGeneral(t,a):
-    return np.array((t*(1-t))**a)
-def get_fisherGeneral_der1(t,a):
-    return np.array(a*(1-2*t)*((t*(1-t))**(a-1)))
-def get_fisherGeneral_der2(t,a):
-    return np.array((a-1)*a*((1-2*t)**2)*(((1-t)*t)**(a-2))-2*a*(((1-t)*t)**(a-1)))
-def get_fisherGeneral_ratio(t,a):
-    return np.array(get_fisherGeneral_der2(t,a)/get_fisherGeneral_der1(t,a))
-def get_fisherGeneral_normalization(t, x0, a):
-    return get_normalization(t, get_fisherGeneral(t,a), get_fisherGeneral_der1(t,a), x0)
+def get_fisherGeneral(xs,a):
+    return np.array((xs*(1-xs))**a)
+def get_fisherGeneral_der1(xs,a):
+    return np.array(a*(1-2*xs)*((xs*(1-xs))**(a-1)))
+def get_fisherGeneral_der2(xs,a):
+    return np.array((a-1)*a*((1-2*xs)**2)*(((1-xs)*xs)**(a-2))-2*a*(((1-xs)*xs)**(a-1)))
+def get_fisherGeneral_ratio(xs,a):
+    return np.array(get_fisherGeneral_der2(xs,a)/get_fisherGeneral_der1(xs,a))
+def get_fisherGeneral_normalization(xs, x0, a):
+    return get_normalization(xs, get_fisherGeneral(xs,a), get_fisherGeneral_der1(xs,a), x0)
 
-def get_entropy(t):
-    t = t[1:-1]
-    return np.array(np.append(np.append(0, -t*np.log(t)-(1-t)*np.log(1-t)), 0))
-def get_entropy_der1(t):
-    return np.array(np.log(1-t) - np.log(t))
-def get_entropy_der2(t):
-    return np.array(1/(t*(t-1)))
-def get_entropy_ratio(t):
-    return np.array(get_entropy_der2(t)/get_entropy_der1(t))
-def get_entropy_normalization(t, x0):
-    return get_normalization(t, get_entropy(t), get_entropy_der1(t), x0)
+def get_entropy(xs):
+    xs = xs[1:-1]
+    return np.array(np.append(np.append(0, -xs*np.log(xs)-(1-xs)*np.log(1-xs)), 0))
+def get_entropy_der1(xs):
+    return np.array(np.log(1-xs) - np.log(xs))
+def get_entropy_der2(xs):
+    return np.array(1/(xs*(xs-1)))
+def get_entropy_ratio(xs):
+    return np.array(get_entropy_der2(xs)/get_entropy_der1(xs))
+def get_entropy_normalization(xs, x0):
+    return get_normalization(xs, get_entropy(xs), get_entropy_der1(xs), x0)
 
-def get_error(t):
-    return np.array([t, 1-t]).min(axis=0)
-def get_error_der1(t):
-    return np.array(list(map(lambda x: 1 if x < 0.5 else -1, t)));
-def get_error_der2(t):
-    return np.array(list(map(lambda x: 0, t)));
-def get_error_ratio(t):
-    return np.array(get_error_der2(t)/get_error_der1(t))
-def get_error_normalization(t, x0):
-    return get_normalization(t, get_error(t), get_error_der1(t), x0)
+def get_error(xs):
+    return np.array([xs, 1-xs]).min(axis=0)
+def get_error_der1(xs):
+    return np.array(list(map(lambda x: 1 if x < 0.5 else -1, xs)));
+def get_error_der2(xs):
+    return np.array(list(map(lambda x: 0, xs)));
+def get_error_ratio(xs):
+    return np.array(get_error_der2(xs)/get_error_der1(xs))
+def get_error_normalization(xs, x0):
+    return get_normalization(xs, get_error(xs), get_error_der1(xs), x0)
 
 def get_normalization(xs, func_ys, func_der1, x0):
     x0_index = get_array_index_by_value(xs, x0)
@@ -107,20 +110,66 @@ def get_cycle_colors():
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
 
-def plot_admissible_functions(t):
+def shrink_arr(arr):
+    return arr[1:]
+
+def get_array_der(arr, xs, delta):
+    der = np.diff(arr)/delta
+    xs = xs[1:]
+    return (xs, der)
+
+def get_func_der(f, xs, delta):
+    f_val = f(xs)
+    f_der = np.diff(f_val)/delta
+    xs = xs[1:]
+    return (xs, f_der)
+
+
+def get_relative_func(f, xs, delta, x0):
+    ''' # Equation of the linear normalization:
+    #   f_{x0}(x) = (f(x)-f(x0)) / |(f'(x0))| + x0
+    # '''
+
+    (xs, f_der_array) = get_func_der(f, xs, delta)
+    x0_index = get_array_index_by_value(xs,x0)
+    f_der = f_der_array[x0_index]
+    f_x = f(xs)
+    f_x0 = f(x0)
+    f_relative = (f_x - f_x0)/np.abs(f_der) + x0
+
+    if(DEBUG):
+        f_relative_2 = []
+        for i in range(len(f_x)):
+            f_relative_2.append((f_x[i] - f_x0)/np.abs(f_der) + x0)
+
+        assert len(f_relative_2) == len(f_relative)
+
+        for i in range(len(f_relative)):
+            assert f_relative_2[i] == f_relative[i]
+
+    print("x0: "+str(x0))
+    print("f_x len: "+str(len(f_x)))
+    print("f_x0: "+str(f_x0))
+    print("f_der: "+str(f_der))
+    print("f_relative len: "+str(len(f_relative)))
+    return (xs, f_relative)
+
+# ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
+
+def plot_admissible_functions(xs):
 
     data = [
-        (get_fisherGeneral(t,1), 'Fisher'),
-        (get_fisherGeneral(t,0.5), 'Root-Fisher'),
-        (get_entropy(t), 'Binary Entropy'),
-        (get_error(t), 'Error Probability'),
+        (get_fisherGeneral(xs,1), 'Fisher'),
+        (get_fisherGeneral(xs,0.5), 'Root-Fisher'),
+        (get_entropy(xs), 'Binary Entropy'),
+        (get_error(xs), 'Error Probability'),
     ]
 
     new_figure() # create new figure
     colors = get_cycle_colors() # get plot colors
 
     for i in range(len(data)):
-        plt.plot(t, data[i][0], next(colors), label=data[i][1], linewidth=LINEWIDTH)
+        plt.plot(xs, data[i][0], next(colors), label=data[i][1], linewidth=LINEWIDTH)
 
     # Set Figure details #  
     get_and_set_legend()
@@ -134,22 +183,22 @@ def plot_admissible_functions(t):
 
     plt.show()
 
-def plot_normalization_functions(t, x0 = 0.3):
+def plot_normalization_functions(xs, x0 = 0.3):
 
     data = [
-        (get_fisherGeneral_normalization(t, x0, 1), 'Fisher'),
-        (get_fisherGeneral_normalization(t, x0, 0.5), 'Root-Fisher'),
-        (get_entropy_normalization(t, x0), 'Binary Entropy'),
-        (get_error_normalization(t, x0), 'Error Probability'),
+        (get_fisherGeneral_normalization(xs, x0, 1), 'Fisher'),
+        (get_fisherGeneral_normalization(xs, x0, 0.5), 'Root-Fisher'),
+        (get_entropy_normalization(xs, x0), 'Binary Entropy'),
+        (get_error_normalization(xs, x0), 'Error Probability'),
     ]
 
     new_figure() # create new figure
     colors = get_cycle_colors() # get plot colors
 
-    plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(t, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
 
     for i in range(len(data)):
-        plt.plot(t, data[i][0], next(colors), label=data[i][1], linewidth=LINEWIDTH)
+        plt.plot(xs, data[i][0], next(colors), label=data[i][1], linewidth=LINEWIDTH)
 
     # Set Figure details #
     get_and_set_legend()
@@ -164,6 +213,7 @@ def plot_normalization_functions(t, x0 = 0.3):
 
     plt.show()
 
-t = np.append(np.arange(0., 1., T_STEP),1)
-# plot_admissible_functions(t)
-plot_normalization_functions(t,0.7)
+
+xs = np.append(np.arange(0., 1., T_STEP),1)
+# plot_admissible_functions(xs)
+plot_normalization_functions(xs,0.7)

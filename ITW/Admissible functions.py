@@ -14,8 +14,8 @@ DEBUG = True
 SAVE_FIGURES = False
 # SAVE_FIGURES = True
 
-USE_LATEX = False
-# USE_LATEX = True
+# USE_LATEX = False
+USE_LATEX = True
 
 T_STEP = 0.0002
 
@@ -213,7 +213,41 @@ def plot_normalization_functions(xs, x0 = 0.3):
 
     plt.show()
 
+def plot_local_improvement(xs, x0 = 0.3):
+
+    data = [
+        # (get_fisherGeneral(xs,1), 'Fisher'),
+        # (get_fisherGeneral(xs,0.5), 'Root-Fisher'),
+        (get_entropy(xs), 'Binary Entropy'),
+        # (get_error(xs), 'Error Probability'),
+    ]
+
+    new_figure() # create new figure
+    colors = get_cycle_colors() # get plot colors
+
+    plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    plt.plot([1-x0,1-x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, 1-x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+
+    for i in range(len(data)):
+        plt.plot(xs, data[i][0], next(colors), linewidth=3, linestyle='--', alpha=0.7) # dotted line
+
+    # Set Figure details #
+    get_and_set_legend()
+    plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
+    import itertools 
+    plt.xticks(np.concatenate((np.linspace(0.0, 1.0, num=6, endpoint=True), 
+                               np.ones(1)*x0, 
+                               np.ones(1)*(1-x0)))) # set the x axis ticks
+    if(USE_LATEX): # latex lables
+        plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
+        plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
+
+    if(SAVE_FIGURES):
+        plt.savefig(f'Normalized Functions with pi_0={x0}.png')
+
+    plt.show()
 
 xs = np.append(np.arange(0., 1., T_STEP),1)
 # plot_admissible_functions(xs)
-plot_normalization_functions(xs,0.7)
+# plot_normalization_functions(xs,0.7)
+plot_local_improvement(xs,0.7)

@@ -14,8 +14,8 @@ DEBUG = True
 SAVE_FIGURES = False
 # SAVE_FIGURES = True
 
-# USE_LATEX = False
-USE_LATEX = True
+USE_LATEX = False
+# USE_LATEX = True
 
 T_STEP = 0.0002
 
@@ -52,9 +52,9 @@ def get_fisherGeneral_normalization(xs, x0, a):
 
 def get_entropy(xs):
     xs = xs[1:-1]
-    return np.array(np.append(np.append(0, -xs*np.log(xs)-(1-xs)*np.log(1-xs)), 0))
+    return np.array(np.append(np.append(0, -xs*np.log2(xs)-(1-xs)*np.log2(1-xs)), 0))
 def get_entropy_der1(xs):
-    return np.array(np.log(1-xs) - np.log(xs))
+    return np.array(np.log2(1-xs) - np.log2(xs))
 def get_entropy_der2(xs):
     return np.array(1/(xs*(xs-1)))
 def get_entropy_ratio(xs):
@@ -73,6 +73,14 @@ def get_error_ratio(xs):
 def get_error_normalization(xs, x0):
     return get_normalization(xs, get_error(xs), get_error_der1(xs), x0)
 
+def get_renyi_entropy(xs, alpha):
+    return np.array(list(map(lambda x: np.log2(x**alpha +(1-x)**alpha), xs)))/(1-alpha)
+def get_renyi_entropy_der1(xs, alpha):
+    # return np.array(list(map(lambda x: np.log2((alpha*(x**(alpha-1) +(1-x)**(alpha-1)))), xs)))/(1-alpha)
+    return np.array(list(map(lambda x: 1/(x**alpha +(1-x)**alpha)*alpha*(x**(alpha-1)+(1-x)**(alpha-1)), xs)))/(1-alpha)
+def get_renyi_entropy_normalization(xs, alpha, x0):
+    return get_normalization(xs, get_renyi_entropy(xs, alpha), get_renyi_entropy_der1(xs, alpha), x0)
+
 def get_normalization(xs, func_ys, func_der1, x0):
     x0_index = get_array_index_by_value(xs, x0)
     func_at_x0 = func_ys[x0_index]
@@ -80,9 +88,6 @@ def get_normalization(xs, func_ys, func_der1, x0):
     return np.array((func_ys-func_at_x0) / abs(func_der1_at_x0) +x0)
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
-
-def log(arr):
-    return np.log(np.abs(np.array(arr)))
 
 def get_min_arrays(arrays, factor = 1):
     minY = np.array(arrays).min(axis=0).min()
@@ -104,8 +109,8 @@ def get_and_set_legend():
     return leg
 
 def get_cycle_colors():
-    # colors_list = list(c[0] for c in mcolors.TABLEAU_COLORS.items())
-    colors_list = 'brgycm'
+    colors_list = list(c[0] for c in mcolors.TABLEAU_COLORS.items())
+    # colors_list = 'brgycm'
     return cycle(colors_list)
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
@@ -123,7 +128,6 @@ def get_func_der(f, xs, delta):
     f_der = np.diff(f_val)/delta
     xs = xs[1:]
     return (xs, f_der)
-
 
 def get_relative_func(f, xs, delta, x0):
     ''' # Equation of the linear normalization:
@@ -163,6 +167,12 @@ def plot_admissible_functions(xs):
         (get_fisherGeneral(xs,0.5), 'Root-Fisher'),
         (get_entropy(xs), 'Binary Entropy'),
         (get_error(xs), 'Error Probability'),
+        (get_renyi_entropy(xs,0.001), 'Reny Entropy, a=0.001'),
+        (get_renyi_entropy(xs,0.1), 'Reny Entropy, a=0.1'),
+        (get_renyi_entropy(xs,0.5), 'Reny Entropy, a=0.5'),
+        (get_renyi_entropy(xs,2), 'Reny Entropy, a=2'),
+        (get_renyi_entropy(xs,5), 'Reny Entropy, a=5'),
+        (get_renyi_entropy(xs,100), 'Reny Entropy, a=100'),
     ]
 
     new_figure() # create new figure
@@ -190,6 +200,12 @@ def plot_normalization_functions(xs, x0 = 0.3):
         (get_fisherGeneral_normalization(xs, x0, 0.5), 'Root-Fisher'),
         (get_entropy_normalization(xs, x0), 'Binary Entropy'),
         (get_error_normalization(xs, x0), 'Error Probability'),
+        (get_renyi_entropy_normalization(xs,0.001,x0), 'Reny Entropy, a=0.001'),
+        (get_renyi_entropy_normalization(xs,0.1,x0), 'Reny Entropy, a=0.1'),
+        (get_renyi_entropy_normalization(xs,0.5,x0), 'Reny Entropy, a=0.5'),
+        (get_renyi_entropy_normalization(xs,2,x0), 'Reny Entropy, a=2'),
+        (get_renyi_entropy_normalization(xs,5,x0), 'Reny Entropy, a=5'),
+        (get_renyi_entropy_normalization(xs,100,x0), 'Reny Entropy, a=100'),
     ]
 
     new_figure() # create new figure
@@ -202,7 +218,8 @@ def plot_normalization_functions(xs, x0 = 0.3):
 
     # Set Figure details #
     get_and_set_legend()
-    plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
+    # plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
+    plt.ylim(-0.2, get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
     plt.xticks(np.concatenate((np.linspace(0.0, 1.0, num=6, endpoint=True), np.ones(1)*x0))) # set the x axis ticks
     if(USE_LATEX): # latex lables
         plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
@@ -216,10 +233,7 @@ def plot_normalization_functions(xs, x0 = 0.3):
 def plot_local_improvement(xs, x0 = 0.3):
 
     data = [
-        # (get_fisherGeneral(xs,1), 'Fisher'),
-        # (get_fisherGeneral(xs,0.5), 'Root-Fisher'),
         (get_entropy(xs), 'Binary Entropy'),
-        # (get_error(xs), 'Error Probability'),
     ]
 
     new_figure() # create new figure
@@ -248,6 +262,6 @@ def plot_local_improvement(xs, x0 = 0.3):
     plt.show()
 
 xs = np.append(np.arange(0., 1., T_STEP),1)
-# plot_admissible_functions(xs)
+plot_admissible_functions(xs)
 # plot_normalization_functions(xs,0.7)
-plot_local_improvement(xs,0.7)
+# plot_local_improvement(xs,0.7)

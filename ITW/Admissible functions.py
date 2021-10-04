@@ -76,8 +76,7 @@ def get_error_normalization(xs, x0):
 def get_renyi_entropy(xs, alpha):
     return np.array(list(map(lambda x: np.log2(x**alpha +(1-x)**alpha), xs)))/(1-alpha)
 def get_renyi_entropy_der1(xs, alpha):
-    # return np.array(list(map(lambda x: np.log2((alpha*(x**(alpha-1) +(1-x)**(alpha-1)))), xs)))/(1-alpha)
-    return np.array(list(map(lambda x: 1/(x**alpha +(1-x)**alpha)*alpha*(x**(alpha-1)+(1-x)**(alpha-1)), xs)))/(1-alpha)
+    return np.array(list(map(lambda x: (alpha*x**(alpha-1)-alpha*(1-x)**(alpha-1))/((1-alpha)*np.log(2)*(x**alpha+(1-x)**alpha)), xs)))
 def get_renyi_entropy_normalization(xs, alpha, x0):
     return get_normalization(xs, get_renyi_entropy(xs, alpha), get_renyi_entropy_der1(xs, alpha), x0)
 
@@ -262,6 +261,6 @@ def plot_local_improvement(xs, x0 = 0.3):
     plt.show()
 
 xs = np.append(np.arange(0., 1., T_STEP),1)
-plot_admissible_functions(xs)
-# plot_normalization_functions(xs,0.7)
+# plot_admissible_functions(xs)
+plot_normalization_functions(xs,0.7)
 # plot_local_improvement(xs,0.7)

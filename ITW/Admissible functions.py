@@ -241,7 +241,7 @@ def plot_normalization_functions(xs, x0 = 0.3, adjust_ylim=True, description=Non
     # Set Figure details #
     get_and_set_legend()
     if(adjust_ylim): plt.ylim(0.1, get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
-    if(adjust_ylim): plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
+    # if(adjust_ylim): plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
     plt.xticks(np.concatenate((np.linspace(0.0, 1.0, num=6, endpoint=True), np.ones(1)*x0))) # set the x axis ticks
     if(USE_LATEX): # latex lables
         plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)

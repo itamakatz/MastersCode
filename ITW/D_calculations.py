@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 s0=2
 s1=-3
-t=1e-5
+t=1e-10 # 1e-14
 PI_0=0.3
 T_STEP = 0.002
 LEVELS=1
@@ -38,10 +38,10 @@ def new_figure():
     return plt.figure(num=None, figsize=(16, 12), dpi=80)
 
 # objective_func = lambda x: renyi(x,0.5)
-# objective_func = lambda x: fisher_general(x,1)
+objective_func = lambda x: fisher_general(x,1)
 # objective_func = lambda x: fisher_general(x,0.5)
 # objective_func = lambda x: entropy(x)
-objective_func = lambda x: error(x)
+# objective_func = lambda x: error(x)
 
 def lambda0(ell):
     return abs(s0+ell)**2
@@ -91,6 +91,7 @@ def D_recursive(levels, pi, ell_array, g):
     if(levels == 0):
         return g(p0(pi,current_ell))*(1-lambda_bar(pi,current_ell)*t) + g(p1(pi,current_ell))*lambda_bar(pi,current_ell)*t
     ell_array = ell_array[1:]
+    #    Todo: check ell_array[:len(ell_array)//2] and ell_array[len(ell_array)//2:]
     return D_recursive(levels-1, p0(pi,current_ell), ell_array[:len(ell_array)//2], g)*(1-lambda_bar(pi,current_ell)*t) + \
            D_recursive(levels-1, p1(pi,current_ell), ell_array[len(ell_array)//2:], g)*lambda_bar(pi,current_ell)*t
 
@@ -118,10 +119,10 @@ def main8():
     
     functions = [
         (lambda x: renyi(x,0.5), 'Renyi'),
-        (lambda x: fisher_general(x,1), 'Fisher'),
-        (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
-        (entropy, 'Entropy'),
-        (error, 'Error'),
+        # (lambda x: fisher_general(x,1), 'Fisher'),
+        # (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
+        # (entropy, 'Entropy'),
+        # (error, 'Error'),
     ]
 
     new_figure()
@@ -150,10 +151,10 @@ def main7():
     
     functions = [
         (lambda x: renyi(x,0.5), 'Renyi'),
-        (lambda x: fisher_general(x,1), 'Fisher'),
-        (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
-        (entropy, 'Entropy'),
-        (error, 'Error'),
+        # (lambda x: fisher_general(x,1), 'Fisher'),
+        # (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
+        # (entropy, 'Entropy'),
+        # (error, 'Error'),
     ]
 
     new_figure()
@@ -182,10 +183,10 @@ def main6():
     
     functions = [
         (lambda x: renyi(x,0.5), 'Renyi'),
-        (lambda x: fisher_general(x,1), 'Fisher'),
-        (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
-        (entropy, 'Entropy'),
-        (error, 'Error'),
+        # (lambda x: fisher_general(x,1), 'Fisher'),
+        # (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
+        # (entropy, 'Entropy'),
+        # (error, 'Error'),
     ]
 
     new_figure()
@@ -205,86 +206,67 @@ def main6():
         plt.title(r'Three timestep ($\boldsymbol{D[\pi]}$ is over 8 posteriors). Second and third timesteps $\ell$s are fixed to $\ell=-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=20)
     plt.show()
 
-def main5():
-    # ls = np.concatenate((np.arange(-200., -20., T_STEP*100), np.arange(-20., 20., T_STEP), np.arange(20., 200., T_STEP*100)))
+def steps_2_fixed_2():
+
     ls = np.arange(-20., 20., T_STEP)
-    
     functions = [
         (lambda x: renyi(x,0.5), 'Renyi'),
-        (lambda x: fisher_general(x,1), 'Fisher'),
-        (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
-        (entropy, 'Entropy'),
-        (error, 'Error'),
-    ]
-
-    new_figure()
-
-    for f in functions:
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[-s0,ell,ell],f[0]), ls))),label=f[1])
-
-    ax = plt.gca()
-    ymin, ymax = ax.get_ylim()
-    plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='Dolinar')
-    plt.plot([-s0,-s0],[ymin, ymax], linestyle='--', alpha=0.7, label='-s0')
-    plt.ylim(ymin, ymax)
-    get_and_set_legend()
-    if(USE_LATEX):
-        plt.xlabel(r'$\boldsymbol{\ell}$', fontsize=AXIS_LABEL_FONT_SIZE)
-        plt.ylabel(r'$\boldsymbol{D[\pi]}$', fontsize=AXIS_LABEL_FONT_SIZE)
-        plt.title(r'Two timestep ($\boldsymbol{D[\pi]}$ is over 4 posteriors). First timestep $\ell$ is fixed to $\ell=-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=20)
-    plt.show()
-
-def main4():
-    # ls = np.concatenate((np.arange(-200., -20., T_STEP*100), np.arange(-20., 20., T_STEP), np.arange(20., 200., T_STEP*100)))
-    ls = np.arange(-20., 20., T_STEP)
-    functions = [
-        # (lambda x: renyi(x,0.5), 'Renyi'),
         (lambda x: fisher_general(x,1), 'Fisher'),
         # (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
         # (entropy, 'Entropy'),
         # (error, 'Error'),
     ]
 
-    new_figure()
-
     for f in functions:
+        new_figure()
         plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[ell,-s0,-s0],f[0]), ls))),label=f[1])
+        ax = plt.gca()
+        ymin, ymax = ax.get_ylim()
+        plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='Dolinar')
+        plt.plot([-s0,-s0],[ymin, ymax], linestyle='--', alpha=0.7, label='-s0')
+        plt.ylim(ymin, ymax)
+        get_and_set_legend()
+        if(USE_LATEX):
+            plt.xlabel(r'$\boldsymbol{\ell}$', fontsize=AXIS_LABEL_FONT_SIZE)
+            plt.ylabel(r'$\boldsymbol{D[\pi]}$', fontsize=AXIS_LABEL_FONT_SIZE)
+            plt.title(r'Two timestep ($\boldsymbol{D[\pi]}$ is over 4 posteriors). Second timestep $\ell$ is fixed to $\ell=-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=20)
+        plt.show()
 
-    ax = plt.gca()
-    ymin, ymax = ax.get_ylim()
-    plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='Dolinar')
-    plt.plot([-s0,-s0],[ymin, ymax], linestyle='--', alpha=0.7, label='-s0')
-    plt.ylim(ymin, ymax)
-    get_and_set_legend()
-    if(USE_LATEX):
-        plt.xlabel(r'$\boldsymbol{\ell}$', fontsize=AXIS_LABEL_FONT_SIZE)
-        plt.ylabel(r'$\boldsymbol{D[\pi]}$', fontsize=AXIS_LABEL_FONT_SIZE)
-        plt.title(r'Two timestep ($\boldsymbol{D[\pi]}$ is over 4 posteriors). Second timestep $\ell$ is fixed to $\ell=-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=20)
-    plt.show()
+def steps_2_fixed_1():
 
-
-def main3():
-    ls = np.arange(-20., 20., T_STEP)
-    pis = np.arange(0.1, 0.45, 0.05)
-    new_figure()
-    for pi in pis:
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(0,pi,[ell],lambda x: fisher_general(x,0.5)), ls))),label=r'$\pi=$'+str(pi))
-    get_and_set_legend()
-    if(USE_LATEX):
-        plt.xlabel(r'$\boldsymbol{\ell}$', fontsize=AXIS_LABEL_FONT_SIZE)
-        plt.ylabel(r'$\boldsymbol{D[\pi]}$', fontsize=AXIS_LABEL_FONT_SIZE)
-        plt.title(r'Single timestep ($\boldsymbol{D[\pi]}$ is over 2 posteriors), for Root-Fisher', fontsize=20)
-    plt.show()
-
-def main2():
-    # ls = np.concatenate((np.arange(-200., -20., T_STEP*100), np.arange(-20., 20., T_STEP), np.arange(20., 200., T_STEP*100)))
     ls = np.arange(-20., 20., T_STEP)
     functions = [
         (lambda x: renyi(x,0.5), 'Renyi'),
         (lambda x: fisher_general(x,1), 'Fisher'),
-        (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
-        (entropy, 'Entropy'),
-        (error, 'Error'),
+        # (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
+        # (entropy, 'Entropy'),
+        # (error, 'Error'),
+    ]
+
+    for f in functions:
+        new_figure()
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[-s0,ell,ell],f[0]), ls))),label=f[1])
+        ax = plt.gca()
+        ymin, ymax = ax.get_ylim()
+        plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='Dolinar')
+        plt.plot([-s0,-s0],[ymin, ymax], linestyle='--', alpha=0.7, label='-s0')
+        plt.ylim(ymin, ymax)
+        get_and_set_legend()
+        if(USE_LATEX):
+            plt.xlabel(r'$\boldsymbol{\ell}$', fontsize=AXIS_LABEL_FONT_SIZE)
+            plt.ylabel(r'$\boldsymbol{D[\pi]}$', fontsize=AXIS_LABEL_FONT_SIZE)
+            plt.title(r'Two timestep ($\boldsymbol{D[\pi]}$ is over 4 posteriors). First timestep $\ell$ is fixed to $\ell=-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=20)
+        plt.show()
+
+def steps_1():
+    # ls = np.concatenate((np.arange(-200., -20., T_STEP*100), np.arange(-20., 20., T_STEP), np.arange(20., 200., T_STEP*100)))
+    ls = np.arange(-20., 20., T_STEP)
+    functions = [
+        (lambda x: renyi(x,0.5), 'Renyi'),
+        # (lambda x: fisher_general(x,1), 'Fisher'),
+        # (lambda x: fisher_general(x,0.5), 'Root-Fisher'),
+        # (entropy, 'Entropy'),
+        # (error, 'Error'),
     ]
 
     new_figure()
@@ -304,9 +286,9 @@ def main2():
         plt.title(r'Single timestep ($\boldsymbol{D[\pi]}$ is over 2 posteriors). $\pi(0)=$'+str(PI_0), fontsize=20)
     plt.show()
 
-def main():
+def steps_2_3d_plot():
     
-    print(f"optimal l gives D={D(PI_0,-s0,-s0,-s0,objective_func)}")
+    # print(f"optimal l gives D={D(PI_0,-s0,-s0,-s0,objective_func)}")
     print(f"optimal l gives D={D_recursive(1,PI_0, [-s0,-s0,-s0],objective_func)}")
 
     dolinar_pi = dolinar_ell(PI_0)
@@ -315,23 +297,21 @@ def main():
     print(f"dolinar ell_pi is {dolinar_pi}")
     print(f"dolinar ell_p0 is {dolinar_p0}")
     print(f"dolinar ell_p1 is {dolinar_p1}")
-    print(f"dolinar D is D={D(PI_0,dolinar_pi,dolinar_p0,dolinar_p1,objective_func)}")
-
-
+    print(f"dolinar D is D={D_recursive(1,PI_0, [dolinar_pi,dolinar_p0,dolinar_p1],objective_func)}")
 
     # print(f"best found l is l={l_best} and gives D={min_D}")
     fig = plt.figure()
     ax = Axes3D(fig)
 
-    ls = np.arange(-4., 4., T_STEP)
-    
+    # ls = np.arange(-4., 4., T_STEP)
+    ls = np.arange(-20., 20., T_STEP*100)
+
     ls0, ls1 = np.meshgrid(np.array(ls), np.array(ls))
     ls0_data = ls0.reshape((len(ls)*len(ls)))
     ls1_data = ls1.reshape((len(ls)*len(ls)))
     data = list(zip(ls0_data,ls1_data))
 
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()*2) as pool:
-    # with multiprocessing.Pool(processes=2) as pool:
         results = pool.map(run_D, data)
 
     # results = np.array(list(map(lambda d: run_D(d), data)))
@@ -359,11 +339,10 @@ def main():
     plt.show()
 
 if __name__ == '__main__':
-    # main()
-    # main2()
-    # main3()
-    main4()
-    # main5()
+    # steps_2_3d_plot()
+    # steps_1()
+    steps_2_fixed_2()
+    # steps_2_fixed_1()
     # main6()
     # main7()
     # print(f"optimal l gives D={D(PI_0,-s0,-s0,-s0,objective_func)}")

@@ -12,6 +12,7 @@ PI_0=0.3
 T_STEP = 0.002
 LEVELS=1
 AXIS_LABEL_FONT_SIZE = 40 # 25
+LINEWIDTH = 5
 TICK_SIZE = 35 # 30
 LEGEND_LENGTH = 4
 LEGEND_WIDTH = 4
@@ -23,7 +24,6 @@ USE_LATEX = True
 if(USE_LATEX):
     matplotlib.rcParams['text.usetex'] = True
     matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-
 
 matplotlib.rcParams['xtick.labelsize'] = TICK_SIZE
 matplotlib.rcParams['ytick.labelsize'] = TICK_SIZE
@@ -130,7 +130,7 @@ def main8():
     levels = 3
     ells = [-s0]*(2**(levels+1)-2)
     for f in functions:
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(levels,PI_0,[ell]+ells,f[0]), ls))),label=f[1])
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(levels,PI_0,[ell]+ells,f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
 
     ax = plt.gca()
     ymin, ymax = ax.get_ylim()
@@ -162,7 +162,7 @@ def main7():
     levels = 3
     ells = [-s0]*(2**(levels+1)-2)
     for f in functions:
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(levels,PI_0,[ell]+ells,f[0]), ls))),label=f[1])
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(levels,PI_0,[ell]+ells,f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
 
     ax = plt.gca()
     ymin, ymax = ax.get_ylim()
@@ -192,7 +192,7 @@ def main6():
     new_figure()
 
     for f in functions:
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(2,PI_0,[ell,-s0,-s0,-s0,-s0,-s0,-s0],f[0]), ls))),label=f[1])
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(2,PI_0,[ell,-s0,-s0,-s0,-s0,-s0,-s0],f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
 
     ax = plt.gca()
     ymin, ymax = ax.get_ylim()
@@ -219,7 +219,7 @@ def steps_2_fixed_2():
 
     for f in functions:
         new_figure()
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[ell,-s0,-s0],f[0]), ls))),label=f[1])
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[ell,-s0,-s0],f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
         ax = plt.gca()
         ymin, ymax = ax.get_ylim()
         plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='Dolinar')
@@ -245,7 +245,7 @@ def steps_2_fixed_1():
 
     for f in functions:
         new_figure()
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[-s0,ell,ell],f[0]), ls))),label=f[1])
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[-s0,ell,ell],f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
         ax = plt.gca()
         ymin, ymax = ax.get_ylim()
         plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='Dolinar')
@@ -272,7 +272,7 @@ def steps_1():
     new_figure()
 
     for f in functions:
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(0,PI_0,[ell],f[0]), ls))),label=f[1])
+        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(0,PI_0,[ell],f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
 
     ax = plt.gca()
     ymin, ymax = ax.get_ylim()

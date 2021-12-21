@@ -10,11 +10,13 @@ from mpl_toolkits.mplot3d import Axes3D
 s0=2
 s1=-3
 t=1e-10 # 1e-14
-PI_0=0.3
-T_STEP = 0.002
+PI_0=0.003
+# PI_0=0.3
+T_STEP = 0.0002
+# T_STEP = 0.02
 LEVELS=1
 AXIS_LABEL_FONT_SIZE = 40 # 25
-LINEWIDTH = 5
+LINEWIDTH = 1
 TICK_SIZE = 20 # 30
 LEGEND_LENGTH = 4
 LEGEND_WIDTH = 4
@@ -24,8 +26,8 @@ TITLE_FONT_SIZE = 15
 # USE_LATEX = False
 USE_LATEX = True
 
-# objective_func = lambda x: renyi(x,0.5)
-objective_func = lambda x: fisher_general(x,1)
+objective_func = lambda x: renyi(x,0.5)
+# objective_func = lambda x: fisher_general(x,1)
 # objective_func = lambda x: fisher_general(x,0.5)
 # objective_func = lambda x: entropy(x)
 # objective_func = lambda x: error(x)
@@ -98,7 +100,7 @@ def error(x): return np.array([x, 1-x]).min(axis=0)
 
 def steps_2_fixed_2():
 
-    ls = np.arange(-20., 20., T_STEP)
+    ls = np.arange(-4., -1., T_STEP)
     functions = [
         (lambda x: renyi(x,0.5), 'Renyi'),
         (lambda x: fisher_general(x,1), 'Fisher'),
@@ -109,10 +111,13 @@ def steps_2_fixed_2():
 
     for f in functions:
         new_figure()
-        plt.plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[ell,-s0,-s0],f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
+        ys = np.array(list(map(lambda ell: D_recursive(1,PI_0,[ell,-s0,-s0],f[0]), ls)))
+        print(min(ys))
+        print(ls[np.argmin(ys)])
+        plt.plot(ls,ys,label=f[1], linewidth=LINEWIDTH)
         ax = plt.gca()
         ymin, ymax = ax.get_ylim()
-        plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='$\ell_{Dolinar}$')
+        # plt.plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='$\ell_{Dolinar}$')
         plt.plot([-s0,-s0],[ymin, ymax], linestyle='--', alpha=0.7, label='$-s_0$')
         plt.ylim(ymin, ymax)
         get_and_set_legend()
@@ -121,6 +126,19 @@ def steps_2_fixed_2():
             plt.ylabel(r'$\boldsymbol{D[\pi]}$', fontsize=AXIS_LABEL_FONT_SIZE)
             plt.title(r'Two timestep. Second $\ell$ is fixed to $-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=TITLE_FONT_SIZE)
         plt.show()
+
+    # fig, axs = plt.subplots(2)
+    # fig.suptitle(r'Two timestep. Second $\ell$ is fixed to $-s_0$. $\pi(0)=$'+str(PI_0) , fontsize=TITLE_FONT_SIZE)
+    # count = 0
+    # for f in functions:
+    #     axs[count].plot(ls,np.array(list(map(lambda ell: D_recursive(1,PI_0,[ell,-s0,-s0],f[0]), ls))),label=f[1], linewidth=LINEWIDTH)
+    #     ax = plt.gca()
+    #     ymin, ymax = axs[count].get_ylim()
+    #     axs[count].plot([dolinar_ell(PI_0),dolinar_ell(PI_0)],[ymin,ymax], linestyle='--', alpha=0.7, label='$\ell_{Dolinar}$')
+    #     axs[count].plot([-s0,-s0],[ymin, ymax], linestyle='--', alpha=0.7, label='$-s_0$')
+    #     get_and_set_legend()
+    #     count+=1
+    # plt.show()
 
 def steps_2_fixed_1():
 

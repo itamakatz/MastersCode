@@ -14,8 +14,8 @@ DEBUG = True
 SAVE_FIGURES = False
 SAVE_FIGURES = True
 
-USE_LATEX = False
-# USE_LATEX = True
+# USE_LATEX = False
+USE_LATEX = True
 
 T_STEP = 0.0002
 
@@ -52,9 +52,9 @@ def get_fisherGeneral_normalization(xs, x0, a):
 
 def get_entropy(xs):
     xs = xs[1:-1]
-    return np.array(np.append(np.append(0, -xs*np.log2(xs)-(1-xs)*np.log2(1-xs)), 0))
+    return np.array(np.append(np.append(0, -xs*np.log(xs)-(1-xs)*np.log(1-xs)), 0))
 def get_entropy_der1(xs):
-    return np.array(np.log2(1-xs) - np.log2(xs))
+    return np.array(np.log(1-xs) - np.log(xs))
 def get_entropy_der2(xs):
     return np.array(1/(xs*(xs-1)))
 def get_entropy_ratio(xs):
@@ -74,7 +74,7 @@ def get_error_normalization(xs, x0):
     return get_normalization(xs, get_error(xs), get_error_der1(xs), x0)
 
 def get_renyi_entropy(xs, alpha):
-    return np.array(list(map(lambda x: np.log2(x**alpha +(1-x)**alpha), xs)))/(1-alpha)
+    return np.array(list(map(lambda x: np.log(x**alpha +(1-x)**alpha), xs)))/(1-alpha)
 def get_renyi_entropy_der1(xs, alpha):
     return np.array(list(map(lambda x: (alpha*x**(alpha-1)-alpha*(1-x)**(alpha-1))/((1-alpha)*np.log(2)*(x**alpha+(1-x)**alpha)), xs)))
 def get_renyi_entropy_normalization(xs, alpha, x0):
@@ -86,6 +86,13 @@ def get_poly_der1(xs, exp, a, b=0):
     return np.array(a*exp*xs**(exp-1))
 def get_poly_normalization(xs, exp, a, b, x0):
     return get_normalization(xs, get_poly(xs, exp, a, b), get_poly_der1(xs, exp, a, b), x0)
+
+def get_pnorm(xs, p):
+    return np.array((xs**p+(1-xs)**p)**(1/p))
+def get_pnorm_der1(xs, p):
+    return np.array((xs**(p-1)-(1-xs)**(p-1))*(xs**p+(1-xs)**p)**(1/p-1))
+def get_pnorm_normalization(xs, p, x0):
+    return get_normalization(xs, get_pnorm(xs, p), get_pnorm_der1(xs, p), x0)
 
 def get_normalization(xs, func_ys, func_der1, x0):
     x0_index = get_array_index_by_value(xs, x0)
@@ -115,8 +122,8 @@ def get_and_set_legend():
     return leg
 
 def get_cycle_colors():
-    colors_list = list(c[0] for c in mcolors.TABLEAU_COLORS.items())
-    # colors_list = 'brgycm'
+    # colors_list = list(c[0] for c in mcolors.TABLEAU_COLORS.items())
+    colors_list = 'brgycm'
     return cycle(colors_list)
 
 # ◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄►◄ #
@@ -169,6 +176,7 @@ def get_relative_func(f, xs, delta, x0):
 def plot_admissible_functions(xs, adjust_ylim = True, description=None):
 
     data = [
+        (get_pnorm(xs,0.5),'0.5-Norm'),
         # (get_poly(xs,1,0.75,-0.25), 'Linear'),
         # (get_poly(xs,2,0.85,-0.05), 'Quadratic'),
         # (get_poly(xs,4,1.4,0.02), 'Quartic'),
@@ -176,14 +184,14 @@ def plot_admissible_functions(xs, adjust_ylim = True, description=None):
         # (get_poly(xs,4,1.5,0.08), 'Quartic'),
         # (get_fisherGeneral(xs,1), 'Fisher'),
         (get_fisherGeneral(xs,0.5), 'Root-Fisher'),
-        (get_entropy(xs), 'Binary Entropy'),
+        # (get_entropy(xs), 'Binary Entropy'),
         # (get_error(xs), 'Error Probability'),
-        # (get_renyi_entropy(xs,0.001), 'Reny Entropy, a=0.001'),
-        # (get_renyi_entropy(xs,0.1), 'Reny Entropy, a=0.1'),
-        # (get_renyi_entropy(xs,0.5), 'Reny Entropy, a=0.5'),
-        # (get_renyi_entropy(xs,2), 'Reny Entropy, a=2'),
-        # (get_renyi_entropy(xs,5), 'Reny Entropy, a=5'),
-        # (get_renyi_entropy(xs,100), 'Reny Entropy, a=100'),
+        # (get_renyi_entropy(xs,0.001), r'Reny Entropy, $\alpha=0.001$'),
+        # (get_renyi_entropy(xs,0.1), r'Reny Entropy, $\alpha=0.1$'),
+        # (get_renyi_entropy(xs,0.5), r'Reny Entropy, $\alpha=0.5$'),
+        # (get_renyi_entropy(xs,2), r'Reny Entropy, $\alpha=2$'),
+        # (get_renyi_entropy(xs,5), r'Reny Entropy, $\alpha=5$'),
+        # (get_renyi_entropy(xs,100), r'Reny Entropy, $\alpha=100$'),
     ]
 
     new_figure() # create new figure
@@ -212,6 +220,7 @@ def plot_admissible_functions(xs, adjust_ylim = True, description=None):
 def plot_normalization_functions(xs, x0 = 0.3, adjust_ylim=True, description=None):
 
     data = [
+        (get_pnorm_normalization(xs,0.5,x0),'0.5-Norm'),
         # (get_poly_normalization(xs,1,0.75,-0.25,x0), 'Linear'),
         # (get_poly_normalization(xs,2,0.85,-0.05,x0), 'Quadratic'),
         # (get_poly_normalization(xs,4,1.4,0.02,x0), 'Quartic'),
@@ -219,28 +228,37 @@ def plot_normalization_functions(xs, x0 = 0.3, adjust_ylim=True, description=Non
         # (get_poly_normalization(xs,4,1.5,0.08,x0), 'Quartic'),
         # (get_fisherGeneral_normalization(xs, x0, 1), 'Fisher'),
         (get_fisherGeneral_normalization(xs, x0, 0.5), 'Root-Fisher'),
-        (get_entropy_normalization(xs, x0), 'Binary Entropy'),
+        # (get_entropy_normalization(xs, x0), 'Binary Entropy'),
         # (get_error_normalization(xs, x0), 'Error Probability'),
-        # (get_renyi_entropy_normalization(xs,0.001,x0), 'Reny Entropy, a=0.001'),
-        # (get_renyi_entropy_normalization(xs,0.1,x0), 'Reny Entropy, a=0.1'),
-        # (get_renyi_entropy_normalization(xs,0.5,x0), 'Reny Entropy, a=0.5'),
-        # (get_renyi_entropy_normalization(xs,2,x0), 'Reny Entropy, a=2'),
-        # (get_renyi_entropy_normalization(xs,5,x0), 'Reny Entropy, a=5'),
-        # (get_renyi_entropy_normalization(xs,100,x0), 'Reny Entropy, a=100'),
+        # (get_renyi_entropy_normalization(xs,0.001,x0), r'Reny Entropy, $\alpha=0.001$'),
+        # (get_renyi_entropy_normalization(xs,0.1,x0), r'Reny Entropy, $\alpha=0.1$'),
+        # (get_renyi_entropy_normalization(xs,0.5,x0), r'Reny Entropy, $\alpha=0.5$'),
+        # (get_renyi_entropy_normalization(xs,2,x0), r'Reny Entropy, $\alpha=2$'),
+        # (get_renyi_entropy_normalization(xs,5,x0), r'Reny Entropy, $\alpha=5$'),
+        # (get_renyi_entropy_normalization(xs,100,x0), r'Reny Entropy, $\alpha=100$'),
     ]
 
     new_figure() # create new figure
     colors = get_cycle_colors() # get plot colors
 
-    # plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05), data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
-    plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
 
     for i in range(len(data)):
         plt.plot(xs, data[i][0], next(colors), label=data[i][1], linewidth=LINEWIDTH)
 
+    ax = plt.gca()
+    ymin, ymax = ax.get_ylim()
+
+    plt.plot([x0,x0], [ymin, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    # plt.plot([1-x0,1-x0], [ymin, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+
+    # plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05), data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    # plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+
+    plt.ylim(ymin, ymax)
+
     # Set Figure details #
     get_and_set_legend()
-    if(adjust_ylim): plt.ylim(0.1, get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
+    if(adjust_ylim): plt.ylim(-0.75, get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
     # if(adjust_ylim): plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
     plt.xticks(np.concatenate((np.linspace(0.0, 1.0, num=6, endpoint=True), np.ones(1)*x0))) # set the x axis ticks
     if(USE_LATEX): # latex lables
@@ -258,41 +276,50 @@ def plot_normalization_functions(xs, x0 = 0.3, adjust_ylim=True, description=Non
 def plot_local_improvement(xs, x0 = 0.3, adjust_ylim=True, description=None):
 
     data = [
-        (get_entropy(xs), 'Binary Entropy'),
+        # (get_entropy(xs), 'Binary Entropy'),
+        (get_renyi_entropy(xs,0.3), r'Reny Entropy, $\alpha=0.3$'),
     ]
 
     new_figure() # create new figure
     colors = get_cycle_colors() # get plot colors
 
-    plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
-    plt.plot([1-x0,1-x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, 1-x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
-
     for i in range(len(data)):
         plt.plot(xs, data[i][0], next(colors), linewidth=3, linestyle='--', alpha=0.7) # dotted line
 
+    ax = plt.gca()
+    ymin, ymax = ax.get_ylim()
+    
+    plt.plot([x0,x0], [ymin, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    # plt.plot([1-x0,1-x0], [ymin, data[0][0][get_array_index_by_value(xs, 1-x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    
+    # plt.plot([x0,x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    # plt.plot([1-x0,1-x0], [get_min_arrays(list( item[0] for item in data ), 1.05)-1, data[0][0][get_array_index_by_value(xs, 1-x0)]], color='k', linestyle='--', alpha=0.7) # dotted line
+    
+    plt.ylim(ymin, ymax)
+
     # Set Figure details #
-    get_and_set_legend()
     if(adjust_ylim): plt.ylim(get_min_arrays(list( item[0] for item in data ), 1.05), get_max_arrays(list( item[0] for item in data ), 1.05)) # set the y scope - min y to max y
     plt.xticks(np.concatenate((np.linspace(0.0, 1.0, num=6, endpoint=True), 
                                np.ones(1)*x0, 
                                np.ones(1)*(1-x0)))) # set the x axis ticks
+    get_and_set_legend()
     if(USE_LATEX): # latex lables
         plt.xlabel(r'$\boldsymbol{p}$', fontsize=AXIS_LABEL_FONT_SIZE)
         plt.ylabel(r'$\boldsymbol{g(p)}$', fontsize=AXIS_LABEL_FONT_SIZE)
 
     if(SAVE_FIGURES):
         if(description):
-            plt.savefig(f'Normalized Functions with pi_0={x0} - {description}.png')
+            plt.savefig(f'Local_improvement with pi_0={x0} - {description}.png')
         else:
-            plt.savefig(f'Normalized Functions with pi_0={x0}.png')
+            plt.savefig(f'Local_improvement with pi_0={x0}.png')
 
     plt.show()
 
 xs = np.append(np.arange(0., 1., T_STEP),1)
 # xs = np.arange(0.2, 0.8, T_STEP)
 adjust_ylim = True
-description = "Preliminaries - r and H"
+description = "r_and_norm"
 x0 = 0.3
-plot_admissible_functions(xs,adjust_ylim,description)
+# plot_admissible_functions(xs,adjust_ylim,description)
 plot_normalization_functions(xs,x0,adjust_ylim,description)
 # plot_local_improvement(xs,x0,adjust_ylim)
